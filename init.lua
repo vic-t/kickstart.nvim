@@ -116,8 +116,32 @@ vim.opt.showmode = false
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
 vim.schedule(function()
-  vim.opt.clipboard = 'unnamedplus'
+  --  vim.opt.clipboard = 'unnamedplus'
 end)
+
+local is_tmux = vim.env.TMUX
+local is_ssh = vim.env.SSH_CONNECTION or vim.env.SSH_TTY or vim.env.SSH_CLIENT
+
+if is_ssh and is_tmux then
+  vim.g.clipboard = {
+    name = 'OSC 52',
+    copy = {
+      ['+'] = require('vim.clipboard.osc52').copy,
+      ['*'] = require('vim.clipboard.osc52').copy,
+    },
+    paste = {
+      ['+'] = require('vim.clipboard.osc52').paste,
+      ['*'] = require('vim.clipboard.osc52').paste,
+    },
+  }
+end
+-- Yank to system clipboard
+vim.keymap.set('n', '<leader>y', '"+yy')
+vim.keymap.set('v', '<leader>y', '"+y')
+
+-- Paste from system clipboard
+vim.keymap.set('n', '<leader>p', '"+p')
+vim.keymap.set('v', '<leader>p', '"+p')
 
 -- Enable break indent
 vim.opt.breakindent = true

@@ -2,7 +2,9 @@ return {
   {
     'ojroques/nvim-osc52',
     config = function()
-      require('osc52').setup()
+      require('osc52').setup {
+        force = true,
+      }
       -- Optional keymaps:
       vim.keymap.set('n', '<leader>y', function()
         require('osc52').copy_register '"'
