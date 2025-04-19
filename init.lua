@@ -119,22 +119,6 @@ vim.schedule(function()
   --  vim.opt.clipboard = 'unnamedplus'
 end)
 
-local is_tmux = vim.env.TMUX
-local is_ssh = vim.env.SSH_CONNECTION or vim.env.SSH_TTY or vim.env.SSH_CLIENT
-
-if is_ssh and is_tmux then
-  vim.g.clipboard = {
-    name = 'OSC 52',
-    copy = {
-      ['+'] = require('vim.clipboard.osc52').copy,
-      ['*'] = require('vim.clipboard.osc52').copy,
-    },
-    paste = {
-      ['+'] = require('vim.clipboard.osc52').paste,
-      ['*'] = require('vim.clipboard.osc52').paste,
-    },
-  }
-end
 -- Yank to system clipboard
 vim.keymap.set('n', '<leader>y', '"+yy')
 vim.keymap.set('v', '<leader>y', '"+y')
@@ -142,6 +126,19 @@ vim.keymap.set('v', '<leader>y', '"+y')
 -- Paste from system clipboard
 vim.keymap.set('n', '<leader>p', '"+p')
 vim.keymap.set('v', '<leader>p', '"+p')
+
+-- If the terminal supports OSC52, then it should be possible to
+-- yank text into the system clipboard even over SSH
+-- For this to work with Tmux in a SSH session, TMUX must have the following setting:
+-- set -s set-clipboard on
+-- difference between on and external: external allows only TMUX to set the clipboard, on allows all
+-- apps running in TMUX setting the clipboard
+-- local is_tmux = vim.env.TMUX -- currently not needed
+local is_ssh = vim.env.SSH_CONNECTION or vim.env.SSH_TTY or vim.env.SSH_CLIENT
+
+if is_ssh then
+  vim.g.clipboard = 'osc52'
+end
 
 -- Enable break indent
 vim.opt.breakindent = true
